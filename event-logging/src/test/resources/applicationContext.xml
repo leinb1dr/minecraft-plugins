@@ -1,0 +1,48 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+       http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.1.xsd
+        http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc.xsd
+        http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.1.xsd">
+
+    <context:component-scan base-package="com.drleinbach.*"/>
+    <context:annotation-config/>
+
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="springDataSource" />
+    </bean>
+
+    <bean id="springDataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+        <property name="url" value="jdbc:mysql://localhost/status"/>
+        <property name="driverClassName" value="com.mysql.jdbc.Driver"/>
+        <property name="username" value="root"/>
+        <property name="password" value="drizzt"/>
+        <property name="removeAbandoned" value="true"/>
+        <property name="initialSize" value="1"/>
+        <property name="maxActive" value="5"/>
+    </bean>
+
+    <bean id="serviceParent" abstract="true">
+        <property name="dataSource" ref="springDataSource"/>
+    </bean>
+
+    <bean id="playerService" class="com.drleinbach.service.PlayerService" parent="serviceParent"/>
+    <bean id="playerLoginEventService" class="com.drleinbach.service.PlayerLoginEventService" parent="serviceParent"/>
+
+    <bean id="playerCache" class="com.drleinbach.util.PlayerCache">
+        <constructor-arg>
+            <map/>
+        </constructor-arg>
+        <constructor-arg ref="playerService"/>
+    </bean>
+
+    <bean id="loginListener" class="com.drleinbach.listeners.LoginListener">
+        <constructor-arg ref="playerCache"/>
+        <constructor-arg ref="playerLoginEventService"/>
+    </bean>
+
+
+</beans>

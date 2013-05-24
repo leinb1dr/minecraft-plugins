@@ -1,0 +1,3 @@
+name: event-logging
+main: com.drleinbach.event_logging.EventLogging
+version: 1.0

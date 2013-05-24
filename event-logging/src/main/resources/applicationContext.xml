@@ -1,0 +1,51 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+        http://www.springframework.org/schema/jdbc
+       http://www.springframework.org/schema/jdbc/spring-jdbc-3.0.xsd">
+
+    <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+        <property name="url" value="jdbc:mysql://localhost/"/>
+        <property name="driverClassName" value="com.mysql.jdbc.Driver"/>
+        <property name="username" value="root"/>
+        <property name="password" value="drizzt"/>
+    </bean>
+
+    <jdbc:initialize-database data-source="dataSource">
+        <jdbc:script location="classpath:logger.sql"/>
+    </jdbc:initialize-database>
+
+    <bean id="springDataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+        <property name="url" value="jdbc:mysql://localhost/status"/>
+        <property name="driverClassName" value="com.mysql.jdbc.Driver"/>
+        <property name="username" value="root"/>
+        <property name="password" value="drizzt"/>
+        <property name="removeAbandoned" value="true"/>
+        <property name="initialSize" value="1"/>
+        <property name="maxActive" value="5"/>
+    </bean>
+
+
+    <bean id="serviceParent" abstract="true">
+        <property name="dataSource" ref="springDataSource"/>
+    </bean>
+
+    <bean id="playerService" class="com.drleinbach.service.PlayerService" parent="serviceParent"/>
+    <bean id="playerLoginEventService" class="com.drleinbach.service.PlayerLoginEventService" parent="serviceParent"/>
+
+    <bean id="playerCache" class="com.drleinbach.util.PlayerCache">
+        <constructor-arg>
+            <map/>
+        </constructor-arg>
+        <constructor-arg ref="playerService"/>
+    </bean>
+
+    <bean id="loginListener" class="com.drleinbach.listeners.LoginListener">
+        <constructor-arg ref="playerCache"/>
+        <constructor-arg ref="playerLoginEventService"/>
+    </bean>
+
+
+</beans>
