@@ -9,8 +9,8 @@
     <packaging>pom</packaging>
     <version>1.0-SNAPSHOT</version>
     <modules>
-        <module>event-logging</module>
         <module>plugin-models</module>
+        <module>event-logging</module>
     </modules>
 
     <properties>
